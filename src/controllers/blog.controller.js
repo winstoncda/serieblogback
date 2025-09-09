@@ -24,7 +24,6 @@ export const getAllBlogs = async (req, res) => {
     const blogs = await Blog.find()
       .populate("author", "username email")
       .sort({ createdAt: -1 });
-    console.log(blogs);
     res.status(200).json(blogs);
   } catch (error) {
     res.status(400).json({ message: error.message });
