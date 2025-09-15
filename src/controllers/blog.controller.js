@@ -23,6 +23,10 @@ export const getAllBlogs = async (req, res) => {
   try {
     const blogs = await Blog.find()
       .populate("author", "username email")
+      .populate({
+        path: "ratings",
+        populate: { path: "author", select: "username email" },
+      })
       .sort({ createdAt: -1 });
     res.status(200).json(blogs);
   } catch (error) {

@@ -6,13 +6,18 @@ const blogSchema = new mongoose.Schema(
     content: { type: String, required: true, minLength: 50 },
     image: { type: String, default: null },
     author: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    viewedBy: {
-      type: [{ type: Schema.Types.ObjectId, ref: "User" }],
-      default: [],
-    },
   },
   { timestamps: true }
 );
+
+blogSchema.virtual("ratings", {
+  ref: "Rating",
+  localField: "_id",
+  foreignField: "blog",
+});
+
+blogSchema.set("toJSON", { virtuals: true });
+blogSchema.set("toObject", { virtuals: true });
 
 const Blog = mongoose.model("Blog", blogSchema);
 
