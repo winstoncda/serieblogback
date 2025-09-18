@@ -5,7 +5,9 @@ import {
   verifyMail,
   currentUser,
   logoutUser,
+  updateProfile,
 } from "../controllers/user.controller.js";
+import { protect } from "../middlewares/authMidlleware.js";
 
 const router = express.Router();
 
@@ -16,6 +18,8 @@ router.post("/login", login);
 router.get("/verifyMail/:token", verifyMail);
 
 router.get("/current", currentUser);
+
+router.put("/profile", protect, updateProfile);
 
 router.delete("/deleteToken", logoutUser);
 

@@ -177,3 +177,37 @@ export const logoutUser = async (req, res) => {
   });
   res.status(200).json({ message: "Déconnexion réussie" });
 };
+
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { currentPassword, newPassword, avatar } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(400).json({ message: "Utilisateur non trouvé" });
+    }
+
+    if (currentPassword) {
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res
+          .status(400)
+          .json({ message: "Mot de passe actuel incorrect" });
+      }
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(newPassword, salt);
+    }
+
+    if (avatar) {
+      user.avatar = avatar;
+    }
+
+    await user.save();
+
+    return res.status(200).json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: "Erreur serveur" });
+  }
+};
