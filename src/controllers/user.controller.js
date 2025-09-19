@@ -234,24 +234,28 @@ export const googleAuth = async (req, res) => {
     const { sub, email, name, picture } = profile;
 
     // vérification si l'utilisateur existe
-    let user = await User.findOne({
-      $or: [{ email }, { username }],
-    });
+    let user = await User.findOne({ email });
 
     if (!user) {
+      let username = name;
+      let existingUser = await User.findOne({ username });
+
+      if (existingUser) {
+        username = `${name}_${Date.now()}`;
+      }
       user = await User.create({
-        username: name,
+        username,
         email,
         avatar: picture,
         provider: "google",
         googleId: sub,
       });
-    }
-
-    if (user.provider !== "google") {
-      return res
-        .status(400)
-        .json({ message: "Email déjà utilisé avec un autre méthode" });
+    } else {
+      if (user.provider !== "google") {
+        return res
+          .status(400)
+          .json({ message: "Email déjà utilisé avec un autre méthode" });
+      }
     }
 
     const jwtToken = jwt.sign({}, process.env.SECRET_KEY, {
