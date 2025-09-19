@@ -234,7 +234,9 @@ export const googleAuth = async (req, res) => {
     const { sub, email, name, picture } = profile;
 
     // vérification si l'utilisateur existe
-    let user = await User.findOne({ email });
+    let user = await User.findOne({
+      $or: [{ email }, { username }],
+    });
 
     if (!user) {
       user = await User.create({
