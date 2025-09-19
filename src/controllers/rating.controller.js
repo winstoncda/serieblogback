@@ -19,6 +19,7 @@ export const addOrUpdateRating = async (req, res) => {
       author: _id,
     });
 
+    await rating.populate("author", "username email");
     return res.status(200).json(rating);
   } catch (error) {
     return res.status(400).json({ message: error.message });

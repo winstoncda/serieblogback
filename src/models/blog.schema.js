@@ -16,6 +16,12 @@ blogSchema.virtual("ratings", {
   foreignField: "blog",
 });
 
+blogSchema.virtual("comments", {
+  ref: "Comment",
+  localField: "_id",
+  foreignField: "blog",
+});
+
 blogSchema.set("toJSON", { virtuals: true });
 blogSchema.set("toObject", { virtuals: true });
 
