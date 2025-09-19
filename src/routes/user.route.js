@@ -6,6 +6,7 @@ import {
   currentUser,
   logoutUser,
   updateProfile,
+  googleAuth,
 } from "../controllers/user.controller.js";
 import { protect } from "../middlewares/authMidlleware.js";
 
@@ -14,6 +15,8 @@ const router = express.Router();
 router.post("/", register);
 
 router.post("/login", login);
+
+router.post("/auth-google", googleAuth);
 
 router.get("/verifyMail/:token", verifyMail);
 

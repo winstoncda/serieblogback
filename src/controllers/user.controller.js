@@ -211,3 +211,63 @@ export const updateProfile = async (req, res) => {
     res.status(400).json({ message: "Erreur serveur" });
   }
 };
+
+export const googleAuth = async (req, res) => {
+  const { token } = req.body;
+
+  try {
+    const response = await fetch(
+      "https://www.googleapis.com/oauth2/v3/userinfo",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const profile = await response.json();
+
+    if (profile.error) {
+      return res.status(400).json({ message: "Token Google invalide" });
+    }
+
+    const { sub, email, name, picture } = profile;
+
+    // vérification si l'utilisateur existe
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = await User.create({
+        username: name,
+        email,
+        avatar: picture,
+        provider: "google",
+        googleId: sub,
+      });
+    }
+
+    if (user.provider !== "google") {
+      return res
+        .status(400)
+        .json({ message: "Email déjà utilisé avec un autre méthode" });
+    }
+
+    const jwtToken = jwt.sign({}, process.env.SECRET_KEY, {
+      subject: user._id.toString(),
+      expiresIn: "7d",
+      algorithm: "HS256",
+    });
+
+    res.cookie("token", jwtToken, {
+      httpOnly: true,
+      secure: process.env.MODE === "production",
+      sameSite: "Strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ message: "Echec authentification google" });
+  }
+};
